@@ -75,19 +75,6 @@
     'Make the next step kind and possible.', 'You are building something by showing up.', 'Take a breath. Then take the next step.', 'Good things grow at their own pace.',
     'Keep your goals close and your self-talk kind.', 'You do not need permission to take up space.', 'A fresh start can be very small.', 'Trust yourself to figure out the next part.'
   ];
-  const SHORTCUT_PROFILES = [
-    { domains: ['youtube.com', 'youtu.be'], name: 'YouTube', key: 'youtube', mark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="white" d="M9.4 7.2v9.6l8-4.8z"/></svg>' },
-    { domains: ['google.com'], name: 'Google', key: 'google', mark: 'G' },
-    { domains: ['github.com'], name: 'GitHub', key: 'github', mark: 'GH' },
-    { domains: ['reddit.com'], name: 'Reddit', key: 'reddit', mark: 'r' },
-    { domains: ['twitch.tv'], name: 'Twitch', key: 'twitch', mark: 'T' },
-    { domains: ['discord.com', 'discord.gg'], name: 'Discord', key: 'discord', mark: 'D' },
-    { domains: ['spotify.com'], name: 'Spotify', key: 'spotify', mark: '♫' },
-    { domains: ['instagram.com'], name: 'Instagram', key: 'instagram', mark: '◎' },
-    { domains: ['gmail.com'], name: 'Gmail', key: 'gmail', mark: 'M' },
-    { domains: ['wikipedia.org'], name: 'Wikipedia', key: 'wikipedia', mark: 'W' },
-    { domains: ['netflix.com'], name: 'Netflix', key: 'netflix', mark: 'N' }
-  ];
   const DEFAULTS = {
     theme: 'dusk', surface: 'glass', corners: 'soft', font: 'system', density: 'comfortable', layout: 'balanced', quoteOffset: 0,
     accent: '#a79bff', background: '#11121a', searchProvider: 'duckduckgo', displayName: '',
@@ -102,7 +89,7 @@
     backgroundImage: '', backgroundOverlay: 32,
     pomodoro: { mode: 'focus', running: false, endsAt: null, remaining: 1500, focusMinutes: 25, shortBreakMinutes: 5, longBreakMinutes: 15, sessions: 0, lastCompletedEndsAt: null },
     weatherLocation: { name: '', latitude: null, longitude: null }, weatherCache: null,
-    rssUrl: '', rssTitle: '', rssItems: [], stocks: [], syncEnabled: false, customCss: '', customCssEnabled: false,
+    rssUrl: '', rssTitle: '', rssItems: [], rssArticleOrigins: [], stocks: [], syncEnabled: false, customCss: '', customCssEnabled: false,
     gradient: { enabled: false, kind: 'linear', angle: 135, colors: ['#11121a', '#29243b', '#131521'] }
   };
   const IS_FIREFOX = /Firefox\//.test(navigator.userAgent);
@@ -154,7 +141,8 @@
     snapshot.backgroundOverlay = DEFAULTS.backgroundOverlay;
     snapshot.weatherLocation = clone(DEFAULTS.weatherLocation);
     snapshot.weatherCache = null;
-    snapshot.rssUrl = ''; snapshot.rssTitle = ''; snapshot.rssItems = [];
+    snapshot.rssUrl = ''; snapshot.rssTitle = ''; snapshot.rssItems = []; snapshot.rssArticleOrigins = [];
+    snapshot.shortcuts = snapshot.shortcuts.map(item => ({ ...item, faviconDataUrl: '' }));
     snapshot.stocks = [];
     snapshot.bookmarks = [];
     snapshot.cryptoAssets = [];
@@ -235,10 +223,12 @@
     const preserved = {
       backgroundImage: local.backgroundImage, backgroundOverlay: local.backgroundOverlay,
       weatherLocation: local.weatherLocation, weatherCache: local.weatherCache,
-      rssUrl: local.rssUrl, rssTitle: local.rssTitle, rssItems: local.rssItems,
+      rssUrl: local.rssUrl, rssTitle: local.rssTitle, rssItems: local.rssItems, rssArticleOrigins: local.rssArticleOrigins,
       stocks: local.stocks, bookmarks: local.bookmarks, cryptoAssets: local.cryptoAssets, externalConsents: local.externalConsents, pomodoro: local.pomodoro, syncEnabled: true
     };
-    return normalize({ ...remote, ...preserved });
+    const localIcons = new Map((local.shortcuts || []).map(item => [item.url, item.faviconDataUrl || '']));
+    const remoteShortcuts = (remote.shortcuts || []).map(item => ({ ...item, faviconDataUrl: localIcons.get(item.url) || '' }));
+    return normalize({ ...remote, ...preserved, shortcuts: remoteShortcuts });
   }
   function closeDialogSmoothly(dialog, returnValue = '') {
     if (!dialog?.open || dialog.classList.contains('is-closing')) return;
@@ -513,10 +503,9 @@
     value.background = validColor(input?.background) ? input.background : DEFAULTS.background;
     value.backgroundImage = safeBackgroundImage(input?.backgroundImage);
     value.backgroundOverlay = Number.isFinite(input?.backgroundOverlay) ? Math.max(0, Math.min(75, Math.round(input.backgroundOverlay))) : DEFAULTS.backgroundOverlay;
-    value.shortcuts = Array.isArray(input?.shortcuts) ? input.shortcuts.filter(x => x && typeof x.title === 'string' && typeof x.url === 'string').map(x => ({
-      id: typeof x.id === 'string' ? x.id.slice(0, 64) : `link-${Math.random().toString(36).slice(2, 10)}`,
-      title: x.title.trim().slice(0, 24), url: normalizeShortcutUrl(x.url), glyph: typeof x.glyph === 'string' ? x.glyph.slice(0, 4) : ''
-    })).filter(x => x.title && x.url) : clone(DEFAULTS.shortcuts);
+    value.shortcuts = Array.isArray(input?.shortcuts)
+      ? input.shortcuts.map(item => StilltabShortcutStorage.normalizeShortcutRecord(item)).filter(Boolean).slice(0, StilltabShortcutStorage.MAX_SHORTCUTS)
+      : clone(DEFAULTS.shortcuts);
     value.tasks = Array.isArray(input?.tasks) ? input.tasks.filter(x => x && typeof x.title === 'string').slice(0, 200).map(x => ({
       id: typeof x.id === 'string' ? x.id.slice(0, 64) : `task-${Math.random().toString(36).slice(2, 10)}`,
       title: x.title.trim().slice(0, 120), done: x.done === true
@@ -534,6 +523,10 @@
     value.rssUrl = rssUrl || '';
     value.rssTitle = typeof input?.rssTitle === 'string' ? input.rssTitle.slice(0, 120) : '';
     value.rssItems = Array.isArray(input?.rssItems) ? input.rssItems.filter(item => item && typeof item.title === 'string' && typeof item.url === 'string').slice(0, 8).map(item => ({ title: item.title.slice(0, 180), url: safeHttpsUrl(item.url) })).filter(item => item.url) : [];
+    value.rssArticleOrigins = Array.isArray(input?.rssArticleOrigins) ? [...new Set(input.rssArticleOrigins.slice(-500).filter(origin => typeof origin === 'string').map(origin => {
+      const normalized = safeHttpsUrl(origin);
+      return normalized && new URL(normalized).origin === origin ? origin : null;
+    }).filter(Boolean))] : [];
     value.stocks = Array.isArray(input?.stocks) ? input.stocks.slice(0, 20).map(item => ({
       symbol: normalizeStockSymbol(item?.symbol),
       price: Number.isFinite(item?.price) && item.price > 0 ? item.price : null,
@@ -609,32 +602,16 @@
     catch { return null; }
   }
   function normalizeShortcutUrl(value) {
-    const raw = String(value || '').trim();
-    if (!raw) return null;
-    const candidate = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
-    const normalized = safeUrl(candidate);
-    if (!normalized) return null;
-    const url = new URL(normalized);
-    return url.username || url.password ? null : url.href;
-  }
-  function shortcutProfile(url) {
-    const hostname = new URL(url).hostname.toLowerCase().replace(/^www\./, '');
-    return SHORTCUT_PROFILES.find(profile => profile.domains.some(domain => hostname === domain || hostname.endsWith(`.${domain}`))) || null;
+    return StilltabShortcutStorage.normalizeShortcutUrl(value);
   }
   function genericShortcutMark(url) {
     const host = new URL(url).hostname.toLowerCase().replace(/^www\./, '');
     return (host.split('.')[0].replace(/[^a-z0-9]/g, '').slice(0, 2) || '↗').toUpperCase();
   }
-  function genericShortcutColor(url) {
-    const host = new URL(url).hostname.toLowerCase();
-    let hash = 0;
-    for (const char of host) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
-    return hash % 8;
-  }
   function shortcutName(url) {
     try {
       const hostname = new URL(url).hostname.toLowerCase().replace(/^www\./, '');
-      return shortcutProfile(url)?.name || hostname.split('.')[0].replace(/[-_]+/g, ' ').replace(/\b\p{L}/gu, letter => letter.toUpperCase()).slice(0, 24) || 'Shortcut';
+      return hostname.split('.')[0].replace(/[-_]+/g, ' ').replace(/\b\p{L}/gu, letter => letter.toUpperCase()).slice(0, 24) || 'Shortcut';
     } catch { return 'Shortcut'; }
   }
   function safeHttpsUrl(value) {
@@ -778,17 +755,7 @@
     return `<section class="welcome clock-widget" data-widget="clock" aria-label="Clock and daily motivation"><p class="eyebrow" id="today-label">YOUR SPACE, YOUR PACE</p><div class="clock-line"><time id="clock" aria-label="Current time">--:--</time><span class="clock-period" id="period"></span></div><div class="quote-line"><h1 class="daily-quote" id="daily-quote" aria-live="polite">${esc(dailyQuote())}</h1><button class="quote-cycle" type="button" data-action="next-quote" aria-label="Show another motivational quote" title="Another quote">↻</button></div><p class="date-line" id="date-line"></p></section>`;
   }
   function renderShortcuts() {
-    const links = state.shortcuts.map(item => {
-      const url = safeUrl(item.url);
-      if (!url) return '';
-      const profile = item.glyph ? null : shortcutProfile(url);
-      const glyph = item.glyph ? esc(item.glyph) : profile?.mark || esc(genericShortcutMark(url));
-      const iconClass = profile ? ` shortcut-glyph--${profile.key}` : (!item.glyph ? ` shortcut-glyph--site-${genericShortcutColor(url)}` : '');
-      let host = '';
-      try { host = new URL(url).hostname.replace(/^www\./, ''); } catch {}
-      return `<div class="shortcut-entry"><a class="shortcut" href="${esc(url)}" title="${esc(item.title)} · ${esc(host)}"><span class="shortcut-glyph${iconClass}" aria-hidden="true">${glyph}</span><span class="shortcut-title">${esc(item.title)}</span><span class="shortcut-arrow" aria-hidden="true">↗</span></a><button class="shortcut-remove" type="button" data-action="remove-shortcut" data-id="${esc(item.id)}" aria-label="Remove ${esc(item.title)}" title="Remove shortcut">×</button></div>`;
-    }).join('');
-    return `<article class="widget-card links-card" data-widget="shortcuts"><div class="card-heading"><div><p class="card-kicker">YOUR FAVORITES</p><h2>Quick links</h2></div><button class="small-icon-button" type="button" data-action="add-link" aria-label="Add a shortcut" title="Add shortcut">＋</button></div><div class="shortcut-list">${links || '<p class="empty-state">No shortcuts yet. Add one to get started.</p>'}</div></article>`;
+    return `<article class="widget-card links-card" data-widget="shortcuts"><div class="card-heading"><div><p class="card-kicker">YOUR FAVORITES</p><h2>Quick links</h2></div><button class="small-icon-button" type="button" data-action="add-link" aria-label="Add a shortcut" title="Add shortcut">＋</button></div><div class="shortcut-list"></div></article>`;
   }
   function renderFocus() {
     return `<article class="widget-card focus-card" data-widget="focus"><div class="card-heading"><div><p class="card-kicker">A GENTLE REMINDER</p><h2>For today</h2></div><button class="small-icon-button" type="button" data-action="edit-focus" aria-label="Edit focus note" title="Edit note">✎</button></div><p class="focus-copy">${esc(state.focusText || 'Add a small reminder for yourself.')}</p><span class="focus-mark" aria-hidden="true">“</span></article>`;
@@ -950,6 +917,8 @@
     }).join('');
     // Every widget renderer escapes user text and validates its URLs before returning markup.
     grid.innerHTML = content || '<div class="empty-welcome"><span class="empty-orbit" aria-hidden="true">✦</span><h2>A clean slate.</h2><p>Open Customize to add the pieces you want.</p><button class="primary-button" type="button" data-action="open-settings">Customize</button></div>';
+    const shortcutList = grid.querySelector('.shortcut-list');
+    if (shortcutList) StilltabShortcutUI.renderShortcuts(shortcutList, state.shortcuts);
     grid.querySelectorAll('[data-widget]').forEach(card => {
       card.draggable = true; card.tabIndex = 0;
       card.setAttribute('aria-label', `${card.querySelector('h2,h1')?.textContent || 'Widget'}. Drag to rearrange; focus and press Alt plus an arrow key to move.`);
@@ -1034,13 +1003,15 @@
     });
   }
   function addShortcut() {
-    showDialog('Add a shortcut', 'QUICK ACCESS', '<label class="field-label" for="link-title">Name <span class="optional-label">(optional)</span></label><input class="dialog-input" id="link-title" maxlength="24" placeholder="Leave blank to use the site name"><label class="field-label" for="link-url">Website or domain</label><input class="dialog-input" id="link-url" type="text" inputmode="url" autocomplete="url" autocapitalize="none" spellcheck="false" placeholder="youtube.com"><label class="field-label" for="link-icon">Custom icon <span class="optional-label">(optional)</span></label><input class="dialog-input" id="link-icon" maxlength="4" placeholder="Auto icon or 1–4 characters"><p class="section-hint">Paste a short domain; HTTPS is added automatically. Popular site icons are bundled locally, so there are no favicon requests.</p>', () => {
+    showDialog('Add a shortcut', 'QUICK ACCESS', '<label class="field-label" for="link-title">Name <span class="optional-label">(optional)</span></label><input class="dialog-input" id="link-title" maxlength="24" placeholder="Leave blank to use the site name"><label class="field-label" for="link-url">Website or domain</label><input class="dialog-input" id="link-url" type="text" inputmode="url" autocomplete="url" autocapitalize="none" spellcheck="false" placeholder="youtube.com"><label class="field-label" for="link-icon">Custom icon <span class="optional-label">(optional)</span></label><input class="dialog-input" id="link-icon" maxlength="4" placeholder="Auto icon or 1–4 characters"><p class="section-hint">Enter any http(s) site. Use the Stilltab toolbar button to save the active tab and its available icon; other links use a private monogram fallback.</p>', () => {
       const rawUrl = $('#link-url').value.trim();
       const url = normalizeShortcutUrl(rawUrl);
       if (!url) { toast('Enter a domain like youtube.com or a valid http(s) URL.'); $('#link-url').focus(); return false; }
+      if (state.shortcuts.some(item => item.url === url)) { toast('That website is already in Quick links.'); $('#link-url').focus(); return false; }
+      if (state.shortcuts.length >= StilltabShortcutStorage.MAX_SHORTCUTS) { toast(`Stilltab supports up to ${StilltabShortcutStorage.MAX_SHORTCUTS} shortcuts.`); return false; }
       const title = $('#link-title').value.trim() || shortcutName(url);
       const glyph = $('#link-icon').value.trim().slice(0, 4);
-      state.shortcuts.push({ id: `link-${Date.now()}`, title, url, glyph });
+      state.shortcuts.push(StilltabShortcutStorage.normalizeShortcutRecord({ id: `link-${Date.now()}`, title, url, glyph }));
       return true;
     });
   }
@@ -1083,7 +1054,28 @@
   }
   function requestArticlePermission(url) {
     if (!globalThis.browser?.permissions?.request) return Promise.resolve(false);
-    return requestDataAndOriginPermission(['websiteActivity'], [`${new URL(url).origin}/*`], 'rss');
+    const origin = new URL(url).origin;
+    return requestDataAndOriginPermission(['websiteActivity'], [`${origin}/*`], 'rss').then(async granted => {
+      if (granted && !state.rssArticleOrigins.includes(origin)) {
+        state.rssArticleOrigins = [...state.rssArticleOrigins, origin].slice(-500);
+        await save();
+      }
+      return granted;
+    });
+  }
+  async function revokeRssOriginPermissions(origins) {
+    const remove = globalThis.browser?.permissions?.remove;
+    if (!remove) return [...origins];
+    const failed = [];
+    for (const origin of origins) {
+      const pattern = `${origin}/*`;
+      try {
+        const removed = await remove.call(browser.permissions, { origins: [pattern] });
+        if (removed === false && browser.permissions.contains && await browser.permissions.contains({ origins: [pattern] })) failed.push(origin);
+      }
+      catch { failed.push(origin); }
+    }
+    return failed;
   }
   function requestStockPermission() {
     return requestDataAndOriginPermission(['authenticationInfo', 'financialAndPaymentInfo'], ['https://www.alphavantage.co/*'], 'stocks');
@@ -1296,7 +1288,7 @@
     setTimeout(() => URL.revokeObjectURL(url), 1000); toast(message);
   }
   function downloadSettings() {
-    const exportable = clone(state); delete exportable.syncEnabled; exportable.externalConsents = clone(DEFAULTS.externalConsents);
+    const exportable = clone(state); delete exportable.syncEnabled; delete exportable.rssArticleOrigins; exportable.externalConsents = clone(DEFAULTS.externalConsents);
     downloadJson('stilltab-settings.json', exportable, 'Settings exported (API keys are never included).');
   }
   function downloadThemes() {
@@ -1401,6 +1393,14 @@
             syncStatusText('A Firefox Sync update was applied.');
           } catch (error) { console.warn('Stilltab could not apply a Firefox Sync update.', error); }
         }, 180);
+      }
+      const localState = area === 'local' ? changes.stilltab?.newValue : null;
+      if (localState && Array.isArray(localState.shortcuts)) {
+        const nextShortcuts = normalize(localState).shortcuts;
+        if (JSON.stringify(nextShortcuts) !== JSON.stringify(state.shortcuts)) {
+          state.shortcuts = nextShortcuts;
+          renderWidgets();
+        }
       }
       const remoteTimer = area === 'local' ? changes.stilltab?.newValue?.pomodoro : null;
       if (!remoteTimer) return;
@@ -1630,11 +1630,16 @@
       }
       if (action === 'clear-rss') {
         const oldUrl = state.rssUrl;
-        state.rssUrl = ''; state.rssTitle = ''; state.rssItems = []; rssStatus = 'Feed removed.';
+        const originsToRemove = new Set(state.rssArticleOrigins);
+        for (const item of state.rssItems) { try { originsToRemove.add(new URL(item.url).origin); } catch {} }
+        if (oldUrl) { try { originsToRemove.add(new URL(oldUrl).origin); } catch {} }
+        state.rssUrl = ''; state.rssTitle = ''; state.rssItems = []; state.rssArticleOrigins = []; rssStatus = 'Feed removed.';
         render(); await save();
-        if (oldUrl && globalThis.browser?.permissions?.remove) {
-          try { await browser.permissions.remove({ origins: [`${new URL(oldUrl).origin}/*`] }); } catch {}
-        }
+        const failedOrigins = await revokeRssOriginPermissions(originsToRemove);
+        if (failedOrigins.length) {
+          state.rssArticleOrigins = failedOrigins; await save();
+          toast('Feed removed, but some article-site permissions could not be revoked. Manage them in your browser’s extension settings.');
+        } else toast('Feed removed and its RSS/article-site permissions were cleared.');
       }
       if (action === 'remove-custom') {
         const id = event.target.closest('[data-id]').dataset.id;
@@ -1719,14 +1724,19 @@
     });
     $('#import-file').addEventListener('change', async event => {
       const file = event.target.files?.[0]; if (!file) return;
-      try { const syncEnabled = state.syncEnabled; const externalConsents = clone(state.externalConsents); state = normalize(await readBackupFile(file, 30_000_000)); state.syncEnabled = syncEnabled; state.externalConsents = externalConsents; state.onboardingDone = true; render(); await save(); toast('Settings imported. API keys and provider approvals are not included.'); }
+      try { const syncEnabled = state.syncEnabled; const externalConsents = clone(state.externalConsents); const rssArticleOrigins = clone(state.rssArticleOrigins); state = normalize(await readBackupFile(file, 30_000_000)); state.syncEnabled = syncEnabled; state.externalConsents = externalConsents; state.rssArticleOrigins = rssArticleOrigins; state.onboardingDone = true; render(); await save(); toast('Settings imported. API keys and provider approvals are not included.'); }
       catch (error) { toast(error.message || 'That settings file could not be read.'); }
       event.target.value = '';
     });
     $('#reset-settings').addEventListener('click', async () => {
-      clearTimeout(syncSaveTimer); await forgetStockApiKey(); state = clone(DEFAULTS);
+      const rssOrigins = new Set(state.rssArticleOrigins);
+      for (const item of state.rssItems) { try { rssOrigins.add(new URL(item.url).origin); } catch {} }
+      if (state.rssUrl) { try { rssOrigins.add(new URL(state.rssUrl).origin); } catch {} }
+      const failedRssOrigins = await revokeRssOriginPermissions(rssOrigins);
+      clearTimeout(syncSaveTimer); await forgetStockApiKey(); state = clone(DEFAULTS); state.rssArticleOrigins = failedRssOrigins;
       syncStatusText('Off on this device. Any prior Firefox Sync copy remains in your account.');
-      render(); await save(); $('#welcome-dialog').showModal(); toast('Choose a starter profile; prior Sync data was not deleted.');
+      render(); await save(); $('#welcome-dialog').showModal();
+      toast(failedRssOrigins.length ? 'Reset complete. Some RSS/article permissions need removal in your browser settings.' : 'Choose a starter profile; prior Sync data was not deleted.');
     });
     document.addEventListener('keydown', event => { if (event.key === 'Escape' && !$('#custom-dialog').open && !$('#article-reader').open && !$('#provider-consent-dialog').open && !$('#welcome-dialog').open && $('#settings-panel').classList.contains('open')) closeSettings(); });
     document.addEventListener('submit', async event => {

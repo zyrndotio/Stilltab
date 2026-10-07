@@ -131,18 +131,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .shortcut-entry .shortcut { flex:1; }
 .shortcut:hover { background:var(--accent-soft);color:var(--ink); }
 .shortcut-glyph { width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:9px;background:var(--input);color:var(--accent);font-size:12px;font-weight:700; }
-.shortcut-glyph svg { display:block;width:16px;height:16px; }
-.shortcut-glyph--youtube { background:#ff0033;color:#fff; }
-.shortcut-glyph--google { background:rgba(66,133,244,.12);color:#4285f4;font-size:16px; }
-.shortcut-glyph--github { background:#24292f;color:#fff;font-size:9px; }
-.shortcut-glyph--reddit { background:#ff4500;color:#fff;font-size:17px; }
-.shortcut-glyph--twitch { background:#9146ff;color:#fff;font-size:15px; }
-.shortcut-glyph--discord { background:#5865f2;color:#fff;font-size:15px; }
-.shortcut-glyph--spotify { background:#1ed760;color:#07120b;font-size:18px; }
-.shortcut-glyph--instagram { background:linear-gradient(135deg,#7542d8,#e54173,#f6a33c);color:#fff;font-size:19px; }
-.shortcut-glyph--gmail { background:rgba(234,67,53,.13);color:#ea4335;font-size:15px; }
-.shortcut-glyph--wikipedia { background:var(--ink);color:var(--bg-deep);font-family:Georgia,serif;font-size:17px; }
-.shortcut-glyph--netflix { background:#e50914;color:#fff;font-size:17px; }
+.shortcut-favicon { display:block;width:17px;height:17px;object-fit:contain; }
 .shortcut-glyph--site-0 { background:#495c98;color:#fff; }
 .shortcut-glyph--site-1 { background:#287c75;color:#fff; }
 .shortcut-glyph--site-2 { background:#a04f6e;color:#fff; }

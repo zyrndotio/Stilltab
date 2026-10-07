@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Save to Stilltab</title>
+  <link rel="stylesheet" href="shortcut-popup.css">
+  <script src="browser-compat.js" defer></script>
+  <script src="shortcut-storage.js" defer></script>
+  <script src="shortcut-favicon.js" defer></script>
+  <script src="shortcut-ui.js" defer></script>
+  <script src="shortcut-popup.js" defer></script>
+</head>
+<body>
+  <main class="popup-shell">
+    <header class="popup-heading">
+      <span class="popup-brand-mark" aria-hidden="true">s</span>
+      <div><p class="popup-eyebrow">STILLTAB</p><h1>Quick links</h1></div>
+    </header>
+    <button class="add-current-tab" id="add-current-tab" type="button">
+      <span aria-hidden="true">＋</span> Add current tab
+    </button>
+    <p class="popup-status" id="popup-status" role="status" aria-live="polite"></p>
+    <section aria-label="Saved shortcuts">
+      <div class="popup-list" id="popup-shortcut-list"></div>
+    </section>
+    <p class="popup-note">Saved only in this browser. Firefox caches small same-site icons only when you add a tab; no favicon search service is contacted.</p>
+  </main>
+</body>
+</html>

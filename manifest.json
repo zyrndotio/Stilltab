@@ -1,13 +1,24 @@
 {
   "manifest_version": 3,
   "name": "Stilltab — A quieter new tab",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "A calm, customizable new tab for Firefox with local-first widgets and user-controlled external requests. No analytics or cookie access.",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
+  "action": {
+    "default_title": "Save current tab to Stilltab",
+    "default_popup": "shortcut-popup.html",
+    "default_icon": {
+      "32": "icons/stilltab-32.png",
+      "48": "icons/stilltab-48.png",
+      "128": "icons/stilltab-128.png"
+    }
+  },
   "permissions": [
-    "storage"
+    "storage",
+    "tabs",
+    "activeTab"
   ],
   "optional_host_permissions": [
     "https://api.open-meteo.com/*",
