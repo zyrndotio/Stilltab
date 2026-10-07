@@ -54,7 +54,7 @@ rm -f "$OUT/stilltab-v${VERSION}-firefox.xpi" \
 # metadata or arbitrary workspace files.
 SOURCE_ROOT="$TMP/source/$(basename "$ROOT")"
 mkdir -p "$SOURCE_ROOT"
-cp "$ROOT/.gitignore" "$ROOT/README.md" "$SOURCE_ROOT/"
+cp "$ROOT/.gitignore" "$ROOT/README.md" "$ROOT/CHANGELOG.md" "$SOURCE_ROOT/"
 cp -R "$ROOT/docs" "$ROOT/manifests" "$ROOT/scripts" "$ROOT/src" "$SOURCE_ROOT/"
 (
   cd "$TMP/source"

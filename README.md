@@ -1,4 +1,6 @@
-# Stilltab 0.8
+# Stilltab 0.8.0
+
+See [CHANGELOG.md](CHANGELOG.md) for the tagged version history and release notes.
 
 Stilltab turns a browser's new tab into a calm, configurable dashboard. It is **local-first**: no analytics, advertising, tracking pixels, cookie API, remote scripts/fonts, or background polling. Search and provider data are sent only when the user invokes the relevant feature. Chrome, Edge, and Firefox use browser-specific manifests and release packages.
 
@@ -53,7 +55,7 @@ The script copies the untransformed authored files and produces these files in t
 - `stilltab-v0.8.0-firefox.xpi` — structured Firefox extension package for local testing.
 - `stilltab-v0.8.0-amo-upload.zip` — installable Firefox package with a root-level manifest and organized feature folders, ready for the AMO package-upload field.
 - `stilltab-v0.8.0-edge.zip` and `stilltab-v0.8.0-chrome.zip` — browser-specific Chromium packages with their manifests at the package root.
-- `stilltab-v0.8.0-source.zip` — complete, readable project archive with all three manifests, docs, icons, popup modules, and package script. It is not the installable AMO package.
+- `stilltab-v0.8.0-source.zip` — complete, readable project archive with the changelog, all three manifests, docs, icons, popup modules, and package script. It is not the installable AMO package.
 
 The build script does **not** minify, bundle, template, or generate extension code. Shipped HTML, CSS, and JavaScript are the authored source. AMO signs an approved listing; the locally generated XPI is unsigned.
 
@@ -85,6 +87,7 @@ src/
   popup/                Save-current-tab toolbar popup
   shared/               Browser compatibility, shortcut storage, icons, renderer
   assets/icons/         Extension and listing artwork
+CHANGELOG.md
 README.md
 ```
 
