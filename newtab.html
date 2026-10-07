@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Stilltab</title>
+  <link rel="stylesheet" href="styles.css">
+  <style id="user-custom-css"></style>
+  <script src="newtab.js" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="Stilltab home">
+      <span class="brand-mark" aria-hidden="true"><span></span></span>
+      <span>stilltab</span>
+    </a>
+    <div class="top-actions">
+      <button class="quiet-button theme-shortcut" id="theme-cycle" type="button" title="Cycle theme" aria-label="Cycle theme"><span class="sun-icon" aria-hidden="true">◐</span><span id="theme-name">Dusk</span></button>
+      <button class="icon-button settings-trigger" id="open-settings" type="button" aria-label="Open settings" title="Customize your new tab"><span aria-hidden="true">☷</span></button>
+    </div>
+  </header>
+
+  <main id="home" class="page-shell">
+    <section class="widget-grid" id="widget-grid" aria-label="Your widgets"></section>
+    <p class="privacy-note"><span class="privacy-dot" aria-hidden="true"></span> Most data stays on this device. Search, weather, feeds, articles, stock and crypto prices contact providers only when you choose those features; bookmarks stay local.</p>
+  </main>
+
+  <aside class="settings-panel" id="settings-panel" aria-labelledby="settings-title" aria-hidden="true">
+    <div class="panel-scrim" id="panel-scrim"></div>
+    <section class="panel-content" role="dialog" aria-modal="true" aria-label="Customize Stilltab">
+      <div class="panel-heading">
+        <div><p class="eyebrow">MAKE IT YOURS</p><h2 id="settings-title">Customize</h2></div>
+        <button class="icon-button close-panel" id="close-settings" type="button" aria-label="Close settings">×</button>
+      </div>
+      <div class="settings-section-tools" aria-label="Settings section controls"><span>Settings sections</span><button type="button" id="expand-settings">Expand all</button><button type="button" id="collapse-settings">Collapse all</button></div>
+      <div class="settings-scroll">
+        <section class="setting-section">
+          <h3>Look & feel</h3>
+          <label class="field-label" for="theme-select">Theme preset</label>
+          <select id="theme-select">
+            <option value="dusk">Dusk · soft violet</option>
+            <option value="paper">Paper · warm light</option>
+            <option value="moss">Moss · quiet green</option>
+            <option value="midnight">Midnight · deep blue</option>
+            <option value="ocean">Ocean · deep water</option>
+            <option value="sakura">Sakura · soft blossom</option>
+            <option value="ember">Ember · warm charcoal</option>
+            <option value="nord">Nord · cool minimal</option>
+            <option value="terminal">Terminal · green phosphor</option>
+            <option value="lavender">Lavender · soft amethyst</option>
+            <option value="sunroom">Sunroom · warm daylight</option>
+            <option value="slate">Slate · quiet blue-grey</option>
+            <option value="custom">Custom colors</option>
+          </select>
+          <p class="section-hint">Each preset also sets card style, corners, font, spacing, and layout. Fine-tune them below and save your own named presets.</p>
+          <div class="button-row theme-buttons">
+            <button class="secondary-button" id="save-theme" type="button">Save current as preset</button>
+            <button class="text-button" id="delete-theme" type="button" hidden>Delete selected preset</button>
+          </div>
+          <div class="field-row color-row">
+            <label class="field-label" for="accent-color">Accent</label>
+            <input id="accent-color" type="color" value="#a79bff" aria-label="Custom accent color">
+          </div>
+          <div class="field-row color-row">
+            <label class="field-label" for="background-color">Background</label>
+            <input id="background-color" type="color" value="#11121a" aria-label="Custom background color">
+          </div>
+          <div class="gradient-editor">
+            <p class="field-label">Gradient builder</p>
+            <label class="field-label" for="gradient-kind">Shape</label>
+            <select id="gradient-kind"><option value="linear">Linear</option><option value="radial">Radial glow</option></select>
+            <label class="field-label" for="gradient-angle">Angle <span id="gradient-angle-value">135°</span></label>
+            <input id="gradient-angle" type="range" min="0" max="360" value="135">
+            <div class="gradient-swatches"><input id="gradient-color-1" type="color" value="#11121a" aria-label="Gradient color one"><input id="gradient-color-2" type="color" value="#29243b" aria-label="Gradient color two"><input id="gradient-color-3" type="color" value="#131521" aria-label="Gradient color three"></div>
+            <div id="gradient-preview" class="gradient-preview" aria-label="Gradient preview"></div>
+            <div class="button-row"><button class="secondary-button" id="apply-gradient" type="button">Apply gradient</button><button class="text-button" id="clear-gradient" type="button">Use solid background</button></div>
+          </div>
+          <div class="local-background-setting">
+            <p class="field-label">Device background</p>
+            <div id="background-preview" class="background-preview is-empty">No image selected</div>
+            <div class="button-row"><button class="secondary-button" id="choose-background" type="button">Choose an image</button><button class="text-button" id="remove-background" type="button" hidden>Remove image</button><input id="background-file" type="file" accept="image/png,image/jpeg,image/webp" hidden></div>
+            <label class="field-label" for="background-overlay">Readability overlay <span id="background-overlay-value">32%</span></label>
+            <input id="background-overlay" type="range" min="0" max="75" value="32" disabled>
+            <p class="section-hint">PNG, JPG, or WebP. The image is resized and saved inside Firefox on this device; nothing is uploaded. The theme adds a light or dark overlay for legibility.</p>
+          </div>
+          <label class="field-label" for="custom-css">Custom CSS</label>
+          <textarea class="dialog-input custom-css-input" id="custom-css" rows="5" maxlength="12000" spellcheck="false" placeholder=".widget-card { box-shadow: none; }"></textarea>
+          <p class="section-hint">Stored locally. @-rules, url(), external fonts, and other network-capable CSS are blocked. Turning CSS off keeps your code saved; clearing it removes the saved rules.</p>
+          <div class="button-row custom-css-actions"><button class="secondary-button apply-css-button" id="apply-custom-css" type="button">Apply custom CSS</button><button class="secondary-button" id="toggle-custom-css" type="button" aria-pressed="false" disabled>No CSS to toggle</button><button class="text-button" id="clear-custom-css" type="button" disabled>Clear custom CSS</button></div>
+          <p class="custom-css-status" id="custom-css-status" role="status" aria-live="polite">No custom CSS is saved.</p>
+          <label class="field-label" for="surface-select">Surface style</label>
+          <select id="surface-select">
+            <option value="glass">Glass</option><option value="solid">Solid</option><option value="gradient">Gradient</option>
+          </select>
+          <label class="field-label" for="corners-select">Corners</label>
+          <select id="corners-select">
+            <option value="soft">Soft rounded</option><option value="square">Blocky</option><option value="pill">Extra round</option>
+          </select>
+          <label class="field-label" for="layout-select">Layout</label>
+          <select id="layout-select"><option value="balanced">Balanced · two columns</option><option value="wide">Wide · three columns</option><option value="focused">Focused · one column</option><option value="bento">Bento · mixed grid</option><option value="sidebar">Compact sidebar</option><option value="masonry">Masonry · flowing cards</option></select>
+          <label class="field-label" for="font-select">Font</label>
+          <select id="font-select">
+            <option value="system">System sans</option><option value="clean-sans">Clean sans</option><option value="humanist">Humanist sans</option><option value="rounded">Rounded sans</option><option value="serif">Editorial serif</option><option value="classic-serif">Classic serif</option><option value="book-serif">Book serif</option><option value="mono">Monospace</option><option value="typewriter">Typewriter</option>
+          </select>
+          <label class="field-label" for="density-select">Spacing</label>
+          <select id="density-select"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select>
+          <label class="field-label" for="display-name">Name above the clock <span class="optional-label">(optional)</span></label>
+          <input class="dialog-input" id="display-name" maxlength="30" placeholder="Leave blank for the default label">
+        </section>
+
+        <section class="setting-section">
+          <h3>Starter profiles</h3>
+          <label class="field-label" for="starter-profile-select">Starting setup</label>
+          <select id="starter-profile-select"><option value="minimal">Minimal · calm and uncluttered</option><option value="focus">Focus · tasks and Pomodoro</option><option value="work-study">Work & Study · notes and bookmarks</option></select>
+          <p class="section-hint">Switching a profile changes visible widgets, theme, and layout; it keeps your saved notes, links, and other data.</p>
+          <button class="secondary-button" id="starter-profile-apply" type="button">Apply profile</button>
+        </section>
+
+        <section class="setting-section">
+          <h3>Keep what you need</h3>
+          <p class="section-hint">Turn widgets on or off, then reorder them with the arrow buttons.</p>
+          <p class="section-hint drag-hint">You can also drag cards, or focus one and press Alt + ↑/↓.</p>
+          <div id="widget-controls" class="widget-controls"></div>
+          <div class="button-row">
+            <button class="secondary-button" id="add-note" type="button">＋ Add text widget</button>
+            <button class="secondary-button" id="add-link" type="button">＋ Add shortcut</button>
+          </div>
+        </section>
+
+        <section class="setting-section">
+          <h3>Pomodoro lengths</h3>
+          <p class="section-hint">The timer runs locally and keeps time if you close the tab. It shows a completion message when Stilltab is open; it does not send notifications.</p>
+          <div class="timer-length-grid">
+            <label class="field-label" for="pomodoro-focus-minutes">Focus · minutes<input class="dialog-input" id="pomodoro-focus-minutes" type="number" min="5" max="90" step="1"></label>
+            <label class="field-label" for="pomodoro-short-minutes">Short break · minutes<input class="dialog-input" id="pomodoro-short-minutes" type="number" min="1" max="30" step="1"></label>
+            <label class="field-label" for="pomodoro-long-minutes">Long break · minutes<input class="dialog-input" id="pomodoro-long-minutes" type="number" min="5" max="60" step="1"></label>
+          </div>
+        </section>
+
+        <section class="setting-section">
+          <h3>Search</h3>
+          <label class="field-label" for="search-provider">Search provider</label>
+          <select id="search-provider"></select>
+          <p class="section-hint">Choose a default provider, or enter a keyword and query in the search bar, such as <code>yt cats</code> or <code>gh issues</code>. Searches go directly to the selected site.</p>
+          <div id="search-keyword-hint" class="search-keyword-hints"></div>
+          <div id="custom-search-engines" class="custom-search-engines"></div>
+          <button class="secondary-button" id="add-search-engine" type="button">＋ Add custom search engine</button>
+        </section>
+
+        <section class="setting-section">
+          <h3>Quick backups</h3>
+          <p class="section-hint">Custom-theme files include visual presets. Device background images are stored separately and are not included.</p>
+          <div class="backup-row"><div><strong>Custom themes</strong><span>Export or merge a theme JSON backup</span></div><div class="button-row"><button class="secondary-button" id="export-themes" type="button">Export</button><button class="secondary-button" id="import-themes" type="button">Import</button></div></div>
+          <input id="import-themes-file" type="file" accept="application/json,.json" hidden>
+          <div class="backup-row"><div><strong>Quick links</strong><span>Import merges links and skips duplicate URLs</span></div><div class="button-row"><button class="secondary-button" id="export-shortcuts" type="button">Export</button><button class="secondary-button" id="import-shortcuts" type="button">Import</button></div></div>
+          <input id="import-shortcuts-file" type="file" accept="application/json,.json" hidden>
+          <div class="backup-row"><div><strong>Bookmarks</strong><span>Locally saved sites; imports merge without duplicates</span></div><div class="button-row"><button class="secondary-button" id="export-bookmarks" type="button">Export</button><button class="secondary-button" id="import-bookmarks" type="button">Import</button></div></div>
+          <input id="import-bookmarks-file" type="file" accept="application/json,.json" hidden>
+        </section>
+
+        <section class="setting-section">
+          <h3>Stock quote provider</h3>
+          <p class="section-hint">Optional end-of-day quotes use Alpha Vantage. Each refresh sends the ticker, your API key, and IP directly to Alpha Vantage. Free keys provide daily data, not live prices; provider rate limits apply.</p>
+          <label class="field-label" for="stock-api-key">Your personal Alpha Vantage API key</label>
+          <input class="dialog-input" id="stock-api-key" type="password" maxlength="80" autocomplete="new-password" placeholder="Enter key (never included in backups or Sync)">
+          <div class="button-row"><button class="secondary-button" id="save-stock-key" type="button">Save key on this device</button><button class="text-button" id="forget-stock-key" type="button">Forget saved key</button><a class="secondary-button" href="https://www.alphavantage.co/support/#api-key" target="_blank" rel="noopener noreferrer">Get a key</a></div>
+          <p class="section-hint" id="stock-key-status" role="status">No API key saved.</p>
+          <p class="section-hint">The key is stored in Firefox extension storage on this device; it is not encrypted at rest and is excluded from all Stilltab backups and Firefox Sync. Never use a key tied to sensitive financial accounts.</p>
+        </section>
+
+        <section class="setting-section" id="firefox-sync-section">
+          <h3>Encrypted cross-device sync</h3>
+          <label class="sync-toggle" for="sync-enabled"><input id="sync-enabled" type="checkbox"><span>Sync selected dashboard data with Firefox Sync</span></label>
+          <p class="section-hint">Off by default. When enabled, Firefox Sync encrypts selected settings end-to-end before they leave this browser. It excludes wallpapers, weather, RSS, stocks, crypto, bookmarks, API keys, and the Pomodoro timer. Desktop Firefox only; add-ons must be enabled in <a href="about:preferences#sync">Firefox Sync settings</a>. Turning this off stops future uploads but does not erase an existing Firefox Sync copy.</p>
+          <p class="section-hint" id="platform-sync-note">Firefox Sync is separate from local-only bookmarks and crypto data.</p>
+          <p class="sync-status" id="sync-status" role="status">Off — data stays on this device.</p>
+          <button class="text-button" id="delete-sync-copy" type="button">Delete synced copy</button>
+        </section>
+
+        <section class="setting-section privacy-settings">
+          <h3>Privacy center</h3>
+          <p class="section-hint">No analytics, tracking pixels, or background requests. Local data and each optional provider are listed below. Firefox shows native data-consent prompts; Edge asks here before first use and then requests only the needed site permission.</p>
+          <div id="privacy-service-list" class="privacy-service-list" aria-live="polite"></div>
+          <p class="section-hint">Provider requests omit cookies and referrers. Normal search and bookmark navigation follows the destination website's own browser behavior. To remove a previously granted site permission, use your browser's extension manager.</p>
+          <button class="text-button" id="reset-provider-consents" type="button" hidden>Ask again before external access</button>
+        </section>
+
+        <section class="setting-section privacy-settings">
+          <h3>Backups & defaults</h3>
+          <p class="section-hint">No analytics, cookies, or background requests. Firefox asks before optional data-sharing features run; host access is separately scoped to the selected service.</p>
+          <div class="button-row">
+            <button class="secondary-button" id="export-settings" type="button">Export settings</button>
+            <button class="secondary-button" id="import-settings" type="button">Import settings</button>
+            <input id="import-file" type="file" accept="application/json,.json" hidden>
+          </div>
+          <button class="text-button" id="reset-settings" type="button">Restore default setup</button>
+        </section>
+      </div>
+      <div class="panel-footer"><span>Stilltab <span id="version-label">0.7</span></span><span>Local by default; Sync is opt-in</span></div>
+    </section>
+  </aside>
+
+  <dialog id="welcome-dialog" class="custom-dialog welcome-dialog" aria-labelledby="welcome-title">
+    <div class="welcome-content">
+      <p class="eyebrow">A QUIETER NEW TAB</p>
+      <h2 id="welcome-title">Choose your starting space</h2>
+      <p class="welcome-intro">Pick a simple starting setup. You can change every widget and style later; no online features are enabled by this choice.</p>
+      <div class="starter-profile-grid">
+        <button type="button" class="starter-profile-card" data-profile-choice="minimal"><span class="profile-card-mark">◌</span><strong>Minimal</strong><span>Clock, search, quick links</span><small>Calm and uncluttered</small></button>
+        <button type="button" class="starter-profile-card" data-profile-choice="focus"><span class="profile-card-mark">◷</span><strong>Focus</strong><span>Focus note, tasks, timer</span><small>One thing at a time</small></button>
+        <button type="button" class="starter-profile-card" data-profile-choice="work-study"><span class="profile-card-mark">▦</span><strong>Work & Study</strong><span>Tasks, notes, bookmarks</span><small>A practical workspace</small></button>
+      </div>
+      <p class="welcome-privacy"><span class="privacy-dot" aria-hidden="true"></span>Stilltab starts local-only. Search, weather, RSS, stocks, and crypto require your action; they are never polled in the background.</p>
+      <button type="button" id="skip-onboarding" class="text-button">Start with Minimal</button>
+    </div>
+  </dialog>
+  <dialog id="provider-consent-dialog" class="custom-dialog provider-consent-dialog" aria-labelledby="provider-consent-title">
+    <div class="provider-consent-content">
+      <p class="eyebrow">EXTERNAL SERVICE</p>
+      <h2 id="provider-consent-title">Allow this request?</h2>
+      <p id="provider-consent-provider" class="consent-provider"></p>
+      <p id="provider-consent-detail" class="consent-detail"></p>
+      <div class="dialog-actions"><button type="button" class="secondary-button" id="provider-consent-cancel">Not now</button><button type="button" class="primary-button" id="provider-consent-allow">Continue</button></div>
+    </div>
+  </dialog>
+  <dialog id="custom-dialog" class="custom-dialog">
+    <form id="custom-form" method="dialog">
+      <div class="dialog-heading"><div><p class="eyebrow" id="dialog-eyebrow">MAKE IT YOURS</p><h2 id="dialog-title">Add something</h2></div><button class="icon-button" type="button" data-dialog-close aria-label="Close">×</button></div>
+      <div id="dialog-fields"></div>
+      <div class="dialog-actions"><button class="secondary-button" type="button" data-dialog-close>Cancel</button><button class="primary-button" id="dialog-save" value="save">Save</button></div>
+    </form>
+  </dialog>
+  <dialog id="article-reader" class="article-reader" aria-labelledby="article-title">
+    <div class="article-reader-content">
+      <div class="article-reader-top"><p class="eyebrow">QUICK READ · TEXT ONLY</p><div class="article-reader-actions"><a id="article-original" class="text-button" href="#" target="_blank" rel="noopener noreferrer">Open original ↗</a><button class="icon-button" type="button" data-article-close aria-label="Close reader">×</button></div></div>
+      <p class="article-source" id="article-source"></p>
+      <h2 id="article-title">Article reader</h2>
+      <p class="article-status" id="article-status" role="status" aria-live="polite"></p>
+      <div class="article-body" id="article-body"></div>
+    </div>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
