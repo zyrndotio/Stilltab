@@ -4,15 +4,15 @@
   "version": "0.8.0",
   "description": "A calm, customizable new tab for Microsoft Edge with local-first widgets and user-controlled external requests. No analytics or cookie access.",
   "chrome_url_overrides": {
-    "newtab": "newtab.html"
+    "newtab": "newtab/index.html"
   },
   "action": {
     "default_title": "Save current tab to Stilltab",
-    "default_popup": "shortcut-popup.html",
+    "default_popup": "popup/index.html",
     "default_icon": {
-      "32": "icons/stilltab-32.png",
-      "48": "icons/stilltab-48.png",
-      "128": "icons/stilltab-128.png"
+      "32": "assets/icons/stilltab-32.png",
+      "48": "assets/icons/stilltab-48.png",
+      "128": "assets/icons/stilltab-128.png"
     }
   },
   "permissions": [
@@ -28,10 +28,10 @@
     "https://*/*"
   ],
   "icons": {
-    "32": "icons/stilltab-32.png",
-    "48": "icons/stilltab-48.png",
-    "64": "icons/stilltab-64.png",
-    "96": "icons/stilltab-96.png",
-    "128": "icons/stilltab-128.png"
+    "32": "assets/icons/stilltab-32.png",
+    "48": "assets/icons/stilltab-48.png",
+    "64": "assets/icons/stilltab-64.png",
+    "96": "assets/icons/stilltab-96.png",
+    "128": "assets/icons/stilltab-128.png"
   }
 }

@@ -1,6 +1,6 @@
 # Implementation sources
 
-Reviewed 2026-10-07 for Stilltab 0.8.0. The user-facing privacy notice is `PRIVACY.md`; open AMO tasks/status are in `AMO_RELEASE_CHECKLIST.md` and exact submission actions are in `AMO_SUBMISSION_STEPS.md`.
+Reviewed 2026-10-07 for Stilltab 0.8.0. The user-facing privacy notice is `docs/PRIVACY.md`; open AMO tasks/status are in `docs/amo/AMO_RELEASE_CHECKLIST.md` and exact submission actions are in `docs/amo/AMO_SUBMISSION_STEPS.md`.
 
 ## Firefox WebExtension permissions and local content security
 
@@ -12,7 +12,7 @@ Mozilla's [extension-page CSP reference](https://developer.mozilla.org/en-US/doc
 
 ## Cross-browser implementation
 
-Microsoft's [Edge extension API support reference](https://learn.microsoft.com/en-us/microsoft-edge/extensions/developer-guide/api-support) and Mozilla's [cross-browser WebExtensions guide](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Build_a_cross_browser_extension) describe Chromium-derived extension API support, browser-specific namespaces/manifest fields, and feature detection. `browser-compat.js` aliases `chrome.*` to `browser.*` on Chromium; Chrome's manifest minimum is 121 for Promise-returning extension APIs, and Edge's supported baseline is 136+. Firefox preserves its native consent and host-prompt flow and requires the `tabs` permission to read Tab URL/title/favicon fields; its popup queries only the active tab after user invocation. Chrome and Edge use `activeTab` and Chromium's `favicon` permission rather than the broader `tabs` permission. Firefox Sync controls remain Firefox-only.
+Microsoft's [Edge extension API support reference](https://learn.microsoft.com/en-us/microsoft-edge/extensions/developer-guide/api-support) and Mozilla's [cross-browser WebExtensions guide](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Build_a_cross_browser_extension) describe Chromium-derived extension API support, browser-specific namespaces/manifest fields, and feature detection. `src/shared/browser-compat.js` aliases `chrome.*` to `browser.*` on Chromium; Chrome's manifest minimum is 121 for Promise-returning extension APIs, and Edge's supported baseline is 136+. Firefox preserves its native consent and host-prompt flow and requires the `tabs` permission to read Tab URL/title/favicon fields; its popup queries only the active tab after user invocation. Chrome and Edge use `activeTab` and Chromium's `favicon` permission rather than the broader `tabs` permission. Firefox Sync controls remain Firefox-only.
 
 ## Weather services
 
@@ -34,7 +34,7 @@ Mozilla Support's [Firefox Sync security explanation](https://support.mozilla.or
 
 ## AMO package and source code
 
-Mozilla's [AMO submission guide](https://extensionworkshop.com/documentation/publish/submitting-an-add-on/), [source-code submission guide](https://extensionworkshop.com/documentation/publish/source-code-submission/), and [add-on policies](https://extensionworkshop.com/documentation/publish/add-on-policies/) explain package upload, source disclosure, review, listing, and privacy expectations. `build-packages.sh` copies the authored readable extension files to a flat Firefox package, Edge and Chrome packages, and a source archive assembled from an explicit allowlist; it excludes `.git` metadata and arbitrary untracked files. The shortcut popup/storage/favicon/renderer helpers are separate authored files and are copied unchanged. The builder does not minify, bundle, template, or generate extension code. The current source-code questionnaire response is No unless build processing is introduced. Stilltab has not been submitted or approved.
+Mozilla's [AMO submission guide](https://extensionworkshop.com/documentation/publish/submitting-an-add-on/), [source-code submission guide](https://extensionworkshop.com/documentation/publish/source-code-submission/), and [add-on policies](https://extensionworkshop.com/documentation/publish/add-on-policies/) explain package upload, source disclosure, review, listing, and privacy expectations. `scripts/build-packages.sh` copies the authored files from `src/` into structured Firefox, Edge, and Chrome packages with a root-level manifest, and builds a source archive from the organized `docs/`, `manifests/`, `scripts/`, and `src/` directories. It excludes `.git` metadata and arbitrary untracked files. The shortcut popup/storage/favicon/renderer helpers remain separate authored files and are copied unchanged. The builder does not minify, bundle, template, or generate extension code. The current source-code questionnaire response is No unless build processing is introduced. Stilltab has not been submitted or approved.
 
 ## 0.8 shortcut, interface, and data boundaries
 

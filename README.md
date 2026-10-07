@@ -32,7 +32,7 @@ Stilltab stores preferences, themes, widget data, bookmarks, background images, 
 
 Search queries go to the chosen search website through normal navigation. Weather requests send the entered/saved city and request IP to Open-Meteo only after a user action. RSS/article requests send the chosen HTTPS URL and request IP to that origin on add/refresh/read. Stock refreshes send the selected ticker, user API key, and request IP to Alpha Vantage. Crypto refreshes send the chosen CoinGecko coin ID and request IP to CoinGecko. Provider terms, rate limits, and logging apply. Requests made through the extension API omit credentials/cookies and referrer; opening a search, shortcut, or bookmark uses normal browser navigation and that destination's browser behavior. Chromium favicons come from the browser's internal store. Firefox may make one same-origin HTTPS favicon request without cookies or referrer when the user clicks **Add current tab**, then stores the small icon locally; it does not contact Google or another public favicon service by default.
 
-See [`PRIVACY.md`](PRIVACY.md) for the detailed privacy-notice draft. It has a maintainer contact placeholder and **must be completed and published at a stable HTTPS URL before an AMO release**.
+See [`docs/PRIVACY.md`](docs/PRIVACY.md) for the detailed privacy-notice draft. It has a maintainer contact placeholder and **must be completed and published at a stable HTTPS URL before an AMO release**.
 
 ## Browser compatibility
 
@@ -42,16 +42,16 @@ See [`PRIVACY.md`](PRIVACY.md) for the detailed privacy-notice draft. It has a m
 
 ## Build release packages
 
-From this directory:
+From the repository root:
 
 ```bash
-./build-packages.sh
+./scripts/build-packages.sh
 ```
 
 The script copies the untransformed authored files and produces these files in the parent directory by default (or a path supplied as its first argument):
 
-- `stilltab-v0.8.0-firefox.xpi` — flat Firefox extension package for local testing.
-- `stilltab-v0.8.0-amo-upload.zip` — same installable Firefox files at the ZIP root, ready for the AMO package-upload field.
+- `stilltab-v0.8.0-firefox.xpi` — structured Firefox extension package for local testing.
+- `stilltab-v0.8.0-amo-upload.zip` — installable Firefox package with a root-level manifest and organized feature folders, ready for the AMO package-upload field.
 - `stilltab-v0.8.0-edge.zip` and `stilltab-v0.8.0-chrome.zip` — browser-specific Chromium packages with their manifests at the package root.
 - `stilltab-v0.8.0-source.zip` — complete, readable project archive with all three manifests, docs, icons, popup modules, and package script. It is not the installable AMO package.
 
@@ -59,7 +59,7 @@ The build script does **not** minify, bundle, template, or generate extension co
 
 ### Temporary installation
 
-**Firefox:** open `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on…** → select the XPI, or choose `manifest.json` from an extracted Firefox package/project.
+**Firefox:** open `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on…** → select the XPI, or choose `manifest.json` from an extracted Firefox package. Build the package first; the source tree is organized for development and its manifest variants live in `manifests/`.
 
 **Edge:** unzip `stilltab-v0.8.0-edge.zip` → open `edge://extensions` → enable **Developer mode** → **Load unpacked** → choose the extracted directory containing its `manifest.json`.
 
@@ -67,15 +67,27 @@ The build script does **not** minify, bundle, template, or generate extension co
 
 ## Mozilla Add-ons (AMO)
 
-See [`AMO_SUBMISSION_STEPS.md`](AMO_SUBMISSION_STEPS.md) for the step-by-step flow, exact package filename, listing details, and how to answer the source-code question. Stilltab has **not** been submitted, signed, approved, or listed. Review the current [`AMO_RELEASE_CHECKLIST.md`](AMO_RELEASE_CHECKLIST.md) before publishing.
+See [`docs/amo/AMO_SUBMISSION_STEPS.md`](docs/amo/AMO_SUBMISSION_STEPS.md) for the step-by-step flow, exact package filename, listing details, and how to answer the source-code question. Stilltab has **not** been submitted, signed, approved, or listed. Review the current [`docs/amo/AMO_RELEASE_CHECKLIST.md`](docs/amo/AMO_RELEASE_CHECKLIST.md) before publishing.
 
-## Project files
+## Repository layout
 
-- `manifest.json` — Firefox MV3 manifest and Firefox data-consent declaration.
-- `manifest.edge.json` and `manifest.chrome.json` — Chromium-specific manifest variants; the build script places the chosen manifest at each package root.
-- `newtab.html`, `newtab.js`, `styles.css` — complete, readable app source.
-- `shortcut-popup.html`, `shortcut-popup.js`, and `shortcut-popup.css` — toolbar action for saving the active tab to Quick links.
-- `shortcut-storage.js`, `shortcut-favicon.js`, `shortcut-ui.js`, and `browser-compat.js` — separated shortcut persistence, favicon, rendering, and browser-namespace helpers.
-- `icons/stilltab-32.png` through `icons/stilltab-128.png` — extension icons; `stilltab-512.png` is a listing-size image; `stilltab-master.png` is the original artwork.
-- `build-packages.sh` — file-copy/archive-only package builder.
-- `PRIVACY.md`, `AMO_RELEASE_CHECKLIST.md`, `AMO_SUBMISSION_STEPS.md`, and `DEVELOPMENT_SOURCES.md` — release and implementation guidance.
+```text
+docs/
+  amo/                 AMO submission guide and release checklist
+  PRIVACY.md           Privacy notice draft
+  DEVELOPMENT_SOURCES.md
+  ROADMAP.md           Proposed v0.9 priorities
+manifests/              Browser-specific source manifests
+scripts/
+  build-packages.sh     Package builder (copies/archives; no code generation)
+src/
+  newtab/               Dashboard page, app logic, and styles
+  popup/                Save-current-tab toolbar popup
+  shared/               Browser compatibility, shortcut storage, icons, renderer
+  assets/icons/         Extension and listing artwork
+README.md
+```
+
+Run the builder from the repository root; it assembles the structured extension package with `manifest.json` at its root. Release ZIPs/XPI are generated outside the repository by default; if moved into the checkout, the generated archive patterns are ignored by Git.
+
+See [`docs/ROADMAP.md`](docs/ROADMAP.md) for a proposed focus for the next release.
